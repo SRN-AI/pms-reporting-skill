@@ -1,6 +1,8 @@
 import json
 import logging
 import asyncio
+import os
+from datetime import datetime
 from typing import List, Dict, Optional, Any
 from playwright.async_api import async_playwright, Page, BrowserContext
 
@@ -184,7 +186,6 @@ class PMSClient:
         data = await self._post_json(url, payload)
         
         valid_tasks = []
-        from datetime import datetime
         today_str = datetime.now().strftime("%Y-%m-%d")
         
         if data.get("success") and "data" in data and "content" in data["data"]:
@@ -226,8 +227,7 @@ class PMSClient:
         """
         # 自动获取操作人工号
         oper_code = await self.get_my_oper_code(project_no, parent_task_id)
-        
-        from datetime import datetime
+
         target_date = date or datetime.now().strftime("%Y-%m-%d")
         
         logger.info(f"开始填报工时(拆分子任务): '{task_name}', 耗时: {hours}H")
@@ -279,7 +279,6 @@ class PMSClient:
         """
         报工的最后一步：填写子任务的进度 and 详细日志。
         """
-        from datetime import datetime
         if date:
             # 兼容 YYYY-MM-DD 格式，转为 YYYY-MM-DD 00:00:00
             target_date = f"{date} 00:00:00"
@@ -307,7 +306,6 @@ class PMSClient:
 # 命令行入口 (CLI)
 if __name__ == "__main__":
     import argparse
-    import os
     import sys
     from dotenv import load_dotenv
     
