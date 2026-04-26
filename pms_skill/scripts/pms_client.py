@@ -2,8 +2,14 @@ import json
 import logging
 import asyncio
 import os
+import io
+import sys
 from datetime import datetime
 from typing import List, Dict, Optional, Any
+
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 from playwright.async_api import async_playwright, Page, BrowserContext
 
 logger = logging.getLogger(__name__)
