@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "mcp__pms-skill__query_available_tasks",
+      "Bash(pip show:*)",
+      "mcp__pms-skill__submit_daily_timesheet",
+      "mcp__pms-skill__revoke_task"
+    ]
+  }
+}

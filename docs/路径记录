@@ -1,0 +1,17 @@
+{
+    "taskNoList": [
+        "1777028459056"
+    ]
+}
+http: //pms.cic.inter/pms/task/doDelTask
+{
+    "successed": true,
+    "returnObject": null,
+    "errors": null,
+    "exceptionCode": "200",
+    "exceptionMsg": null,
+    "exceptionMsgArgs": null,
+    "success": true,
+    "code": "200",
+    "msg": "success"
+}

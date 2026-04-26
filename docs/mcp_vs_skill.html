@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>传统 Skill vs MCP 协议深度对比</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 2rem;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .card {
+            flex: 1;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .card.markdown::before {
+            background: linear-gradient(90deg, #34d399, #10b981);
+        }
+
+        .card.mcp::before {
+            background: linear-gradient(90deg, #60a5fa, #8b5cf6);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card.markdown .icon-wrapper { color: #34d399; }
+        .card.mcp .icon-wrapper { color: #8b5cf6; }
+
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .analogy {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--text-muted);
+            margin-bottom: 2rem;
+            font-style: italic;
+            color: #cbd5e1;
+        }
+
+        .card.markdown .analogy { border-color: #10b981; }
+        .card.mcp .analogy { border-color: #8b5cf6; }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            margin-top: 3px;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .pro { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .con { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .feature-text h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .feature-text p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Conclusion Section */
+        .conclusion {
+            margin-top: 4rem;
+            max-width: 800px;
+            text-align: center;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            animation: fadeInUp 1s ease-out 0.4s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .conclusion h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        .conclusion p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .comparison-container {
+                flex-direction: column;
+            }
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>架构之争：Skill vs MCP</h1>
+        <p>为什么现在的先进 AI 应用都在向 MCP (Model Context Protocol) 转型？这两者在本质上到底有什么区别？</p>
+    </div>
+
+    <div class="comparison-container">
+        <!-- 传统 Skill Card -->
+        <div class="card markdown">
+            <div class="card-header">
+                <div class="icon-wrapper">📝</div>
+                <h2>传统文本 Skill</h2>
+            </div>
+            
+            <div class="analogy">
+                "就像给 AI 发了一本《员工入职手册》。它知道该干什么，但手脚被捆住了，没有权限触碰你的电脑系统。"
+            </div>
+
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon pro">✓</div>
+                    <div class="feature-text">
+                        <h3>极低的编写门槛</h3>
+                        <p>任何人只要会写中文就能写。就是一个纯文本的 Markdown 文件，无需任何编程知识。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon pro">✓</div>
+                    <div class="feature-text">
+                        <h3>直观的业务大脑</h3>
+                        <p>非常适合用来设定角色（如“你是一个幽默的客服”）和业务规则说明。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon con">✕</div>
+                    <div class="feature-text">
+                        <h3>没有“手脚”（硬伤）</h3>
+                        <p>它只是一个大脑。它无法真实地访问公司的数据库，无法点开浏览器，更无法真正调用 PMS 系统的提交接口。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon con">✕</div>
+                    <div class="feature-text">
+                        <h3>环境封闭</h3>
+                        <p>无法动态感知用户的实时上下文（比如用户的本地文件、正在运行的代码、或者当前的 Cookie）。</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- MCP Card -->
+        <div class="card mcp">
+            <div class="card-header">
+                <div class="icon-wrapper">🔌</div>
+                <h2>MCP 协议微服务</h2>
+            </div>
+
+            <div class="analogy">
+                "就像给 AI 植入了一个万能的【Type-C 接口】。不仅给了它大脑，还直接把它和公司的内网系统物理直连了。"
+            </div>
+
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon pro">✓</div>
+                    <div class="feature-text">
+                        <h3>赋予真实行动力 (Action)</h3>
+                        <p>这是 MCP 最大的优势。它可以执行真实的 Python 代码，去操作浏览器、发网络请求、甚至是修改本地文件。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon pro">✓</div>
+                    <div class="feature-text">
+                        <h3>极强的生态兼容性</h3>
+                        <p>一套代码，到处运行。只要写好了这个 MCP Server，Claude Code、Cursor、甚至未来支持该协议的“龙虾”平台，都能直接即插即用。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon pro">✓</div>
+                    <div class="feature-text">
+                        <h3>动态上下文注入</h3>
+                        <p>可以让大模型直接读取您的实时数据（比如您 PMS 系统里现在刚好剩几个任务），而不是每次都要人工把数据复制给大模型。</p>
+                    </div>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon con">✕</div>
+                    <div class="feature-text">
+                        <h3>开发门槛较高</h3>
+                        <p>必须懂编程（如 Python/TS），需要了解服务端、路由、序列化，并维护一个长驻进程。</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="conclusion">
+        <h3>💡 我们的项目属于哪种？</h3>
+        <p>我们采用的是 <strong>最强形态的结合体</strong>！<br>
+        我们写了 <code>pms_skill.md</code> 作为大模型的“魂”（让它学会职场术语），同时写了 <code>mcp_server.py</code> 作为大模型的“肉体”（让它能强行杀入 PMS 系统抢坑位）。</p>
+        <div class="badge">完全体 AI Agent</div>
+    </div>
+
+    <script>
+        // 添加卡片跟随鼠标的微动效 (Glassmorphism 3D effect)
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -5;
+                const rotateY = ((x - centerX) / centerX) * 5;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            });
+        });
+    </script>
+</body>
+</html>

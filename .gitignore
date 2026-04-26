@@ -1,0 +1,19 @@
+# Sensitive info
+.env
+storage_state.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Skill artifacts
+pms_skill.zip
+pmsSkill/.env
+pmsSkill/storage_state.json
